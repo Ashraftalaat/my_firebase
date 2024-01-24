@@ -1,19 +1,22 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:my_firebase/categories/editcategory.dart';
-import 'package:my_firebase/note/viewnote.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class ViewNote extends StatefulWidget {
+  final String categoryId;
+  const ViewNote({
+    Key? key,
+    required this.categoryId,
+  }) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<ViewNote> createState() => _ViewNoteState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _ViewNoteState extends State<ViewNote> {
   bool isLoading = true;
 
 // لتخزين الداتا اللي هنحصل عليها من firestore
@@ -25,7 +28,8 @@ class _HomePageState extends State<HomePage> {
     // هنحصل منه علي list من document الموجودة في collection
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('categories')
-        .where("id", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .doc(widget.categoryId)
+        .collection("note")
         .get();
     // // عشان نشوف CircularProgressIndicator
     // await Future.delayed(const Duration(seconds: 1));
@@ -53,7 +57,7 @@ class _HomePageState extends State<HomePage> {
         child: const Icon(Icons.add),
       ),
       appBar: AppBar(
-        title: const Text('HomePage'),
+        title: const Text('Note'),
         actions: [
           IconButton(
               onPressed: () async {
@@ -83,51 +87,39 @@ class _HomePageState extends State<HomePage> {
                   crossAxisCount: 2, mainAxisExtent: 150.0),
               itemBuilder: (context, i) {
                 return InkWell(
-                  onTap: () {
-                    //push(MaterialPageRoute( بدل مانضع الصفحة في main بالroute
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: ((context) =>
-                            ViewNote(categoryId: data[i].id))));
-                  },
                   // عند الضغط المطول
                   onLongPress: () {
                     AwesomeDialog(
-                        context: context,
-                        dialogType: DialogType.WARNING,
-                        animType: AnimType.RIGHSLIDE,
-                        title: 'Error',
-                        desc: ' اختر ماذا تريد ؟',
-                        btnCancelText: "حذف",
-                        btnCancelOnPress: () async {
-                          await FirebaseFirestore.instance
-                              .collection('categories')
-                              .doc(data[i].id)
-                              .delete();
-                          Navigator.of(context)
-                              .pushReplacementNamed("homepage");
-                        },
-                        btnOkText: "تعديل",
-                        btnOkOnPress: () async {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => EditCategory(
-                                  docid: data[i].id,
-                                  oldName: data[i]['name'])));
-                        }).show();
+                            context: context,
+                            dialogType: DialogType.WARNING,
+                            animType: AnimType.RIGHSLIDE,
+                            title: 'Error',
+                            desc: ' اختر ماذا تريد ؟',
+                            btnCancelText: "حذف",
+                            btnCancelOnPress: () async {
+                              // await FirebaseFirestore.instance
+                              //     .collection('categories')
+                              //     .doc(data[i].id)
+                              //     .delete();
+                              // Navigator.of(context)
+                              //     .pushReplacementNamed("homepage");
+                            },
+                            btnOkText: "تعديل",
+                            btnOkOnPress: () async {
+                              // Navigator.of(context).push(MaterialPageRoute(
+                              //     builder: (context) => EditCategory(
+                              //         docid: data[i].id,
+                              //         oldName: data[i]['name'])));
+                            })
+                        .show();
                   },
                   child: Card(
                     child: Container(
                       padding: const EdgeInsets.all(15),
                       child: Column(
                         children: [
-                          Image.asset(
-                            "images/5.png",
-                            height: 90,
-                          ),
-                          const SizedBox(
-                            height: 5,
-                          ),
                           //عشان loop بنحط [i]
-                          Text("${data[i]['name']}")
+                          Text("${data[i]['note']}")
                         ],
                       ),
                     ),
