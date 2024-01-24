@@ -35,12 +35,12 @@ class _EditCategoryState extends State<EditCategory> {
       try {
         isLoading = true;
         setState(() {});
-        //set = update
+        //set = update{merge: false => field delete} or {merge: true => update normal}
         //set = add
         // يعني لو doc موجود هتعدله ولو مش موجود هتضيفه
         // await categories.doc(widget.docid).update({"name": name.text});
-        await categories
-            .doc(widget.docid)
+        await categories.doc(widget.docid)
+            //SetOptions(merge: true)مهمة عشان لا يمسح id لما يعدل
             .set({"name": name.text}, SetOptions(merge: true));
         isLoading = false;
         // لايوجد داعي لوضع setstate هنا لان Navigator هتعمل refresh
@@ -54,6 +54,13 @@ class _EditCategoryState extends State<EditCategory> {
         print("Error $e");
       }
     }
+  }
+
+// اي صفحة فيها TextEditingController لازم نعمل dispose
+  @override
+  void dispose() {
+    super.dispose();
+    name.dispose();
   }
 
   @override

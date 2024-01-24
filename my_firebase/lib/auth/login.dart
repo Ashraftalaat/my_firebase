@@ -54,6 +54,15 @@ class _LoginState extends State<Login> {
     );
   }
 
+// اي صفحة فيها TextEditingController لازم نعمل dispose
+// حتي لايحدث تسريب للذاكرة
+  @override
+  void dispose() {
+    super.dispose();
+    email.dispose();
+    password.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

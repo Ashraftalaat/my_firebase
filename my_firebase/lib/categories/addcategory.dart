@@ -53,6 +53,14 @@ class _AddCategoryState extends State<AddCategory> {
   //       .catchError((error) => print("Failed to add user: $error"));
   // }
 
+// اي صفحة فيها TextEditingController لازم نعمل dispose
+// حتي لايحدث تسريب للذاكرة
+  @override
+  void dispose() {
+    super.dispose();
+    name.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
