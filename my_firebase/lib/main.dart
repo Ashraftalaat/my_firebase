@@ -54,7 +54,7 @@ class _MyAppState extends State<MyApp> {
       ),
       // لو عامل تسجيل دخول "حسابه مش نيل"وتم التحقق من الايميل => ندخل علي الهوم وإلا ندخل علي اللوجن
       home: const FilterFirestore(),
-      //  (FirebaseAuth.instance.currentUser != null &&
+      // (FirebaseAuth.instance.currentUser != null &&
       //         FirebaseAuth.instance.currentUser!.emailVerified)
       //     ? const HomePage()
       //     : const Login(),
@@ -63,6 +63,7 @@ class _MyAppState extends State<MyApp> {
         "login": (context) => const Login(),
         "homepage": (context) => const HomePage(),
         "addcategory": (context) => const AddCategory(),
+        "filter": (context) => const FilterFirestore(),
       },
     );
   }
