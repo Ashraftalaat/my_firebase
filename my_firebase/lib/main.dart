@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:my_firebase/auth/login.dart';
 import 'package:my_firebase/auth/signup.dart';
 import 'package:my_firebase/categories/addcategory.dart';
+import 'package:my_firebase/firebasetools/filter.dart';
+import 'package:my_firebase/firebasetools/imagepicker.dart';
 import 'package:my_firebase/homepage.dart';
-import 'package:my_firebase/note/filter.dart';
 
 void main() async {
   //(1)
@@ -53,7 +54,7 @@ class _MyAppState extends State<MyApp> {
                 IconThemeData(color: Color.fromARGB(255, 255, 255, 255))),
       ),
       // لو عامل تسجيل دخول "حسابه مش نيل"وتم التحقق من الايميل => ندخل علي الهوم وإلا ندخل علي اللوجن
-      home: const FilterFirestore(),
+      home: const FilterStorage(),
       // (FirebaseAuth.instance.currentUser != null &&
       //         FirebaseAuth.instance.currentUser!.emailVerified)
       //     ? const HomePage()
@@ -64,6 +65,7 @@ class _MyAppState extends State<MyApp> {
         "homepage": (context) => const HomePage(),
         "addcategory": (context) => const AddCategory(),
         "filter": (context) => const FilterFirestore(),
+        "imagepicker": (context) => const FilterStorage()
       },
     );
   }
