@@ -1,9 +1,14 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:my_firebase/components/custombuttonauth.dart';
 import 'package:my_firebase/components/customtextfieldadd.dart';
 import 'package:my_firebase/note/viewnote.dart';
+import 'package:path/path.dart';
 
 class AddNote extends StatefulWidget {
   final String docid;
@@ -23,7 +28,7 @@ class _AddNoteState extends State<AddNote> {
 
   bool isLoading = false;
 
-  addNote() async {
+  addNote(context) async {
     //      Add
 // هننسخها من الموقع https://firebase.flutter.dev/docs/firestore/usage
 //"الصندوق اللي بداخله الدوكمينت الاقسام"اولا هننشئ الكولكشن
@@ -37,7 +42,7 @@ class _AddNoteState extends State<AddNote> {
         setState(() {});
         DocumentReference response =
             //مش محتاجين نضيف id عشان نحن بنفس القسم
-            await collectionnote.add({"note": note.text});
+            await collectionnote.add({"note": note.text, "url": url ?? "none"});
         isLoading = false;
         // لايوجد داعي لوضع setstate هنا لان Navigator هتعمل refresh
         // setState(() {});
@@ -66,6 +71,35 @@ class _AddNoteState extends State<AddNote> {
 
 // اي صفحة فيها TextEditingController لازم نعمل dispose
 // حتي لايحدث تسريب للذاكرة
+
+  // يجب استدعاء "io" وليس "html"
+  File? file;
+  String? url;
+//وضعنا الكود من  https://pub.dev/packages/image_picker/versions/0.8.7+1
+  getImage() async {
+    final ImagePicker picker = ImagePicker();
+// Pick an image.
+    // final XFile? imagegallery =
+    //     await picker.pickImage(source: ImageSource.gallery);
+// Capture a photo.
+    final XFile? imagecamera =
+        await picker.pickImage(source: ImageSource.camera);
+    if (imagecamera != null) {
+      file = File(imagecamera.path);
+      //upload file
+      // هنزل package path
+      //هيجيب اسمه
+      var imagename = basename(imagecamera.path);
+      // هنرفعه وهتتخزن هنا
+      var refstorage = FirebaseStorage.instance.ref("images/$imagename");
+      //ارفعلي الصورة علي الاستضافة
+      await refstorage.putFile(file!);
+      //جيب اللينك اللي بتتخزن فيه الصورة
+      url = await refstorage.getDownloadURL();
+    }
+    setState(() {});
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -98,9 +132,15 @@ class _AddNoteState extends State<AddNote> {
                       },
                     ),
                   ),
+                  CustomButtonUpload(
+                      onPressed: () {
+                        getImage();
+                      },
+                      title: "Upload Image",
+                      isSelected: url == null ? false : true),
                   CustomButtonAuth(
                       onPressed: () {
-                        addNote();
+                        addNote(context);
                       },
                       title: "Add")
                 ],

@@ -54,11 +54,10 @@ class _MyAppState extends State<MyApp> {
                 IconThemeData(color: Color.fromARGB(255, 255, 255, 255))),
       ),
       // لو عامل تسجيل دخول "حسابه مش نيل"وتم التحقق من الايميل => ندخل علي الهوم وإلا ندخل علي اللوجن
-      home: const FilterStorage(),
-      // (FirebaseAuth.instance.currentUser != null &&
-      //         FirebaseAuth.instance.currentUser!.emailVerified)
-      //     ? const HomePage()
-      //     : const Login(),
+      home: (FirebaseAuth.instance.currentUser != null &&
+              FirebaseAuth.instance.currentUser!.emailVerified)
+          ? const HomePage()
+          : const Login(),
       routes: {
         "signup": (context) => const SignUp(),
         "login": (context) => const Login(),

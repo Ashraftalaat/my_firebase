@@ -2,6 +2,7 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:my_firebase/note/addnote.dart';
@@ -110,6 +111,13 @@ class _ViewNoteState extends State<ViewNote> {
                                     .collection("note")
                                     .doc(data[i].id)
                                     .delete();
+                                // علشان نمسح الصور ومتتحفظش في فايربيس وتعمل مساحة علي الفاضي
+                                if (data[i]['url'] != "none") {
+                                  FirebaseStorage.instance
+                                      .refFromURL(data[i]['url'])
+                                      .delete();
+                                }
+
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (context) => ViewNote(
                                         categoryId: widget.categoryId)));
@@ -129,7 +137,15 @@ class _ViewNoteState extends State<ViewNote> {
                             child: Column(
                               children: [
                                 //عشان loop بنحط [i]
-                                Text("${data[i]['note']}")
+                                Text("${data[i]['note']}"),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                if (data[i]['url'] != "none")
+                                  Image.network(
+                                    data[i]['url'],
+                                    height: 70,
+                                  )
                               ],
                             ),
                           ),
