@@ -6,6 +6,7 @@ import 'package:my_firebase/auth/signup.dart';
 import 'package:my_firebase/categories/addcategory.dart';
 import 'package:my_firebase/firebasetools/filter.dart';
 import 'package:my_firebase/firebasetools/imagepicker.dart';
+import 'package:my_firebase/firebasetools/notification.dart';
 import 'package:my_firebase/homepage.dart';
 
 void main() async {
@@ -54,10 +55,11 @@ class _MyAppState extends State<MyApp> {
                 IconThemeData(color: Color.fromARGB(255, 255, 255, 255))),
       ),
       // لو عامل تسجيل دخول "حسابه مش نيل"وتم التحقق من الايميل => ندخل علي الهوم وإلا ندخل علي اللوجن
-      home: (FirebaseAuth.instance.currentUser != null &&
-              FirebaseAuth.instance.currentUser!.emailVerified)
-          ? const HomePage()
-          : const Login(),
+      home: const TestNotification(),
+      //  (FirebaseAuth.instance.currentUser != null &&
+      //         FirebaseAuth.instance.currentUser!.emailVerified)
+      //     ? const HomePage()
+      //     : const Login(),
       routes: {
         "signup": (context) => const SignUp(),
         "login": (context) => const Login(),
