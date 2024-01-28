@@ -10,12 +10,24 @@ import 'package:my_firebase/firebasetools/imagepicker.dart';
 import 'package:my_firebase/firebasetools/notification.dart';
 import 'package:my_firebase/homepage.dart';
 
+// إظهار الاشعار في background في الخلفية
+//هننسخ الكود من https://firebase.flutter.dev/docs/messaging/usage
+// بيوضع في الاعلي
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("================Background message");
+  print(message.notification!.title);
+  print(message.notification!.body);
+  print("================Background message");
+}
+
 void main() async {
   //(1)
   //اضافة الفيربيس
   //هننسخهم من https://firebase.flutter.dev/docs/overview
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  //هننسخ الكود من https://firebase.flutter.dev/docs/messaging/usage
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(const MyApp());
 }
 
@@ -30,17 +42,6 @@ class _MyAppState extends State<MyApp> {
   //(2)
   @override
   void initState() {
-    // إظهار الاشعار في foreground حتي وهو شغال
-    //مهمة جدا لانها عبارة عن stream مفتوحة علي طول
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      if (message.notification != null) {
-        print("=====================");
-        print(message.notification!.title);
-        print(message.notification!.body);
-        print("===========================");
-      }
-    });
-
     // ضفناها من doc https://firebase.flutter.dev/docs/auth/start
     // لمعرفة حالة الحساب في كل ثانية هل هو مسجل ام لا
     FirebaseAuth.instance.authStateChanges().listen((User? user) {

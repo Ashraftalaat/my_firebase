@@ -59,6 +59,18 @@ class _TestNotificationState extends State<TestNotification> {
 
   @override
   void initState() {
+    // إظهار الاشعار في foreground حتي وهو شغال
+    //مهمة جدا لانها عبارة عن stream مفتوحة علي طول
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        print("=====================Foreground message");
+        print(message.notification!.title);
+        print(message.notification!.body);
+        print("=====================Foreground message");
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("${message.notification!.body}")));
+      }
+    });
     getToken();
     //myrequestPermission();
     super.initState();
