@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:my_firebase/firebasetools/chat.dart';
 
 class TestNotification extends StatefulWidget {
   const TestNotification({Key? key}) : super(key: key);
@@ -59,11 +60,20 @@ class _TestNotificationState extends State<TestNotification> {
 
   @override
   void initState() {
+    //  "عند ظهور الاشعار في الخلفية"عند الضغط علي الاشعار والتفاعل معه
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      //وممكن نوجه لاظهار صفحة معينة مثل الشات
+      if (message.data['type'] == "chat") {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => const Chat()));
+      }
+    });
+
     // إظهار الاشعار في foreground حتي وهو شغال
     //مهمة جدا لانها عبارة عن stream مفتوحة علي طول
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (message.notification != null) {
-        print("=====================Foreground message");
+        print("=====================Foreground onMessage");
         print(message.notification!.title);
         print(message.notification!.body);
         print(message.data);
