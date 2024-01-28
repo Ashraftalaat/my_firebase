@@ -66,6 +66,8 @@ class _TestNotificationState extends State<TestNotification> {
         print("=====================Foreground message");
         print(message.notification!.title);
         print(message.notification!.body);
+        print(message.data);
+        //message.data['name']لو هطبع جزء من الداتا
         print("=====================Foreground message");
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("${message.notification!.body}")));
@@ -133,7 +135,8 @@ sendMessage(title, message) async {
   var body = {
     "to":
         " cS1U7GIlSoC7KilTyVeM0y:APA91bEyuM1TMqdOddjjGOGO7Ch-Dk9R538w-Yiws-Uyu_9bZvpLHKwkp4ZtvvqKCPAbfq6S6XQAbbZZX1c5JehallSoXKyVfGTcBMH3HEW-p74Ow8LIvC20W4gRlE0xqEzyjEr8CstB",
-    "notification": {"title": title, "body": message}
+    "notification": {"title": title, "body": message},
+    "data": {"id": "12", "name": "ashraf", "type": "alert", "m": "dodoo"}
   };
 
   var req = http.Request('POST', url);

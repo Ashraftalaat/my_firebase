@@ -10,13 +10,14 @@ import 'package:my_firebase/firebasetools/imagepicker.dart';
 import 'package:my_firebase/firebasetools/notification.dart';
 import 'package:my_firebase/homepage.dart';
 
-// إظهار الاشعار في background في الخلفية
+// إظهار الاشعار في onMessage background في الخلفية
 //هننسخ الكود من https://firebase.flutter.dev/docs/messaging/usage
 // بيوضع في الاعلي
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("================Background message");
   print(message.notification!.title);
   print(message.notification!.body);
+  print(message.data);
   print("================Background message");
 }
 
