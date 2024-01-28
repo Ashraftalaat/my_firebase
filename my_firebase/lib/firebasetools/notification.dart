@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class TestNotification extends StatefulWidget {
   const TestNotification({Key? key}) : super(key: key);
@@ -20,7 +21,7 @@ class _TestNotificationState extends State<TestNotification> {
     print(mytoken);
   }
 // هننسخ token اللي هيظهر في consol
-//  " dWg9PlGbRTOkvfDt8Oq6bF:APA91bF_ryioXUeoiE-PeNo_uKVVYBpj9bzuK84a6j3o44sFOi6tOR1D3hqWzP7dXAH-_7I123bePAsBbAVKzbT1b5twoGHJkT37XkD3yGM8kO9su93bt4kAaMbeozTs3ZsULVRQv9xZ "
+//  " cS1U7GIlSoC7KilTyVeM0y:APA91bEyuM1TMqdOddjjGOGO7Ch-Dk9R538w-Yiws-Uyu_9bZvpLHKwkp4ZtvvqKCPAbfq6S6XQAbbZZX1c5JehallSoXKyVfGTcBMH3HEW-p74Ow8LIvC20W4gRlE0xqEzyjEr8CstB "
 // في الفايربيز
 // ملحوظ token هيتغير عند مسح التطبيق فيجب نسخه مرة اخري
 // هيصل الاشعار علي الموبايل ولكن في حالة كان
@@ -67,20 +68,47 @@ class _TestNotificationState extends State<TestNotification> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notification'),
+        title: const Text('Notification'),
       ),
       body: Container(
         child: MaterialButton(
           onPressed: () async {
+            //هيرسل اشعار في حالة background لمايكون في الخلفية
             await sendMessage("hi", "how are you");
           },
-          child: Text("send message"),
+          child: const Text("send message"),
         ),
       ),
     );
   }
 }
 
+// Cloud Messaging Token with Api notification
+//اولا هندخل علي  https://stackoverflow.com/questions/37490629/firebase-send-notification-with-rest-api
+// ثانيا هناخد اللينك ونضعه في السيندر كلاينت
+//"URL:
+//https://fcm.googleapis.com/fcm/send"
+// هنضيف Header:
+//"Content-Type": "application/json",
+//"Authorization": "key=<Server_key>"
+//هنحصل علي <Server_key> من الفايربيز Project settings => cloud messaging
+// هنعمبل manage API in google Cloud
+//وبكدة هنحصل علي <Server_key> وهيكون
+//"AAAAQtEcZ5I:APA91bF5CvaOr0pcHUBnJnW23u1TlqPRL0UdFYSRcc3JA1isdbqyP-TLEqO4_dpCovtSCjQawNivoabpNdpD38xavJ04CEtBQzCGH_VhVLSvwSi9KthcIbwurpZGS8hy3qA3UCy7oC7k"
+//عشان نرسل الاشعار هنحط BODY:
+// {
+//     "to": "هننسخ token اللي هيظهر في consol
+//  " cS1U7GIlSoC7KilTyVeM0y:APA91bEyuM1TMqdOddjjGOGO7Ch-Dk9R538w-Yiws-Uyu_9bZvpLHKwkp4ZtvvqKCPAbfq6S6XQAbbZZX1c5JehallSoXKyVfGTcBMH3HEW-p74Ow8LIvC20W4gRlE0xqEzyjEr8CstB "",
+//     "notification": {
+//       "title": "hi",
+//       "body": "welcome",
+//       "mutable_content": true,
+//       "sound": "Tri-tone"
+//       },
+//هنعمل format عشانن تتشال الاخطاء لو موجودة
+// ثم----- نضغط send "post"
+//وهنحول هذا Request --{} الي dart
+// هننسخه بعد ذلك هنا
 sendMessage(title, message) async {
   var headersList = {
     'Accept': '*/*',
@@ -92,11 +120,10 @@ sendMessage(title, message) async {
 
   var body = {
     "to":
-        " dWg9PlGbRTOkvfDt8Oq6bF:APA91bF_ryioXUeoiE-PeNo_uKVVYBpj9bzuK84a6j3o44sFOi6tOR1D3hqWzP7dXAH-_7I123bePAsBbAVKzbT1b5twoGHJkT37XkD3yGM8kO9su93bt4kAaMbeozTs3ZsULVRQv9xZ",
+        " cS1U7GIlSoC7KilTyVeM0y:APA91bEyuM1TMqdOddjjGOGO7Ch-Dk9R538w-Yiws-Uyu_9bZvpLHKwkp4ZtvvqKCPAbfq6S6XQAbbZZX1c5JehallSoXKyVfGTcBMH3HEW-p74Ow8LIvC20W4gRlE0xqEzyjEr8CstB",
     "notification": {"title": title, "body": message}
   };
 
-  var http;
   var req = http.Request('POST', url);
   req.headers.addAll(headersList);
   req.body = json.encode(body);

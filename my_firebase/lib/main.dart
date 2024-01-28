@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:my_firebase/auth/login.dart';
 import 'package:my_firebase/auth/signup.dart';
@@ -29,6 +30,17 @@ class _MyAppState extends State<MyApp> {
   //(2)
   @override
   void initState() {
+    // إظهار الاشعار في foreground حتي وهو شغال
+    //مهمة جدا لانها عبارة عن stream مفتوحة علي طول
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        print("=====================");
+        print(message.notification!.title);
+        print(message.notification!.body);
+        print("===========================");
+      }
+    });
+
     // ضفناها من doc https://firebase.flutter.dev/docs/auth/start
     // لمعرفة حالة الحساب في كل ثانية هل هو مسجل ام لا
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
