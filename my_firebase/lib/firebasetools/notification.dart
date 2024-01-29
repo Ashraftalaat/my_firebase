@@ -15,7 +15,7 @@ class TestNotification extends StatefulWidget {
 class _TestNotificationState extends State<TestNotification> {
   //#############  Notification  ########
   // يوجد طريقتين لارسال الاشعارات الطريقة الاولي
-  //                token
+  // ################# token       الطريقة الاولي
   getToken() async {
     String? mytoken = await FirebaseMessaging.instance.getToken();
     print("================================");
@@ -58,16 +58,39 @@ class _TestNotificationState extends State<TestNotification> {
 // //User granted permission
 // //يعني التطبيق مسموح له الوصول للاشعارات
 
+//عند ظهور الاشعار والتطبيق مقفول تماما"terminal" والتفاعل معه
+// هننسخ الكود من Handling Interaction  https://firebase.flutter.dev/docs/messaging/notifications
+//عبارة عن function
+  getInit() async {
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+    // يجب ان يكون initialMessage لاتساوي null حتي لايحدث خطاء عند عمل run
+    if (initialMessage != null && initialMessage.notification != null) {
+      String? title = initialMessage.notification!.title;
+      String? body = initialMessage.notification!.title;
+
+      //وممكن نوجه لاظهار صفحة معينة مثل الشات
+      //هنستبدل message بال initialMessage
+      if (initialMessage.data['type'] == "chat") {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => Chat(body: body!)));
+      }
+    }
+  }
+
   @override
   void initState() {
-    //  "عند ظهور الاشعار في الخلفية"عند الضغط علي الاشعار والتفاعل معه
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      //وممكن نوجه لاظهار صفحة معينة مثل الشات
-      if (message.data['type'] == "chat") {
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => const Chat()));
-      }
-    });
+    getInit();
+
+    // //  "عند ظهور الاشعار في الخلفية background "عند الضغط علي الاشعار والتفاعل معه
+    // //عبارة عن stream
+    // FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    //   //وممكن نوجه لاظهار صفحة معينة مثل الشات
+    //   if (message.data['type'] == "chat") {
+    //     Navigator.of(context)
+    //         .push(MaterialPageRoute(builder: (context) =>  Chat()));
+    //   }
+    // });
 
     // إظهار الاشعار في foreground حتي وهو شغال
     //مهمة جدا لانها عبارة عن stream مفتوحة علي طول
@@ -95,14 +118,48 @@ class _TestNotificationState extends State<TestNotification> {
         title: const Text('Notification'),
       ),
       body: Container(
-        child: MaterialButton(
-          onPressed: () async {
-            //هيرسل اشعار في حالة background لمايكون في الخلفية
-            await sendMessage("hi", "how are you");
-          },
-          child: const Text("send message"),
-        ),
-      ),
+          child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Center(
+            child: MaterialButton(
+              color: Colors.blue,
+              textColor: Colors.white,
+              onPressed: () async {
+                // هننسخه من https://firebase.flutter.dev/docs/messaging/usage
+                // اول ما هيضغط هيشترك في اشرف طلعت
+                await FirebaseMessaging.instance
+                    .subscribeToTopic('ashraftalaat');
+
+                // //هيرسل اشعار في حالة background لمايكون في الخلفية
+                // await sendMessage("hi", "how are you");
+              },
+              child: const Text("subscribe"),
+            ),
+          ),
+          MaterialButton(
+            color: Colors.blue,
+            textColor: Colors.white,
+            onPressed: () async {
+              // هننسخه من https://firebase.flutter.dev/docs/messaging/usage
+              // الغيت الاشتراك
+              await FirebaseMessaging.instance
+                  .unsubscribeFromTopic('ashraftalaat');
+            },
+            child: const Text("unsubscribe"),
+          ),
+          MaterialButton(
+            color: Colors.blue,
+            textColor: Colors.white,
+            onPressed: () async {
+              //هيرسل اشعار في حالة background لمايكون في الخلفية
+              await sendMessageTopic("hi", "how are you", 'ashraftalaat');
+            },
+            child: const Text("send message Topic"),
+          ),
+        ],
+      )),
     );
   }
 }
@@ -145,6 +202,43 @@ sendMessage(title, message) async {
   var body = {
     "to":
         " cS1U7GIlSoC7KilTyVeM0y:APA91bEyuM1TMqdOddjjGOGO7Ch-Dk9R538w-Yiws-Uyu_9bZvpLHKwkp4ZtvvqKCPAbfq6S6XQAbbZZX1c5JehallSoXKyVfGTcBMH3HEW-p74Ow8LIvC20W4gRlE0xqEzyjEr8CstB",
+    "notification": {"title": title, "body": message},
+    "data": {"id": "12", "name": "ashraf", "type": "alert", "m": "dodoo"}
+  };
+
+  var req = http.Request('POST', url);
+  req.headers.addAll(headersList);
+  req.body = json.encode(body);
+
+  var res = await req.send();
+  final resBody = await res.stream.bytesToString();
+
+  if (res.statusCode >= 200 && res.statusCode < 300) {
+    print(resBody);
+  } else {
+    print(res.reasonPhrase);
+  }
+}
+
+//########### Topics  الطريقة الثانية لارسال الاشعارات
+//بدون  token عشان بيتغير مع مختلف الاجهزة والمستخدمين
+// onMessage  &  onMessageOpenedApp  &  getInitialMessage()
+// كله بيشتغل مع  topic
+// اهم ميزة هي ارسال الاشعار لعدد كبير من المستخدمين
+
+//هحدد topic اللي هيرسله الاشعار كمتغير
+sendMessageTopic(title, message, topic) async {
+  var headersList = {
+    'Accept': '*/*',
+    'Content-Type': 'application/json',
+    'Authorization':
+        'key=AAAAQtEcZ5I:APA91bF5CvaOr0pcHUBnJnW23u1TlqPRL0UdFYSRcc3JA1isdbqyP-TLEqO4_dpCovtSCjQawNivoabpNdpD38xavJ04CEtBQzCGH_VhVLSvwSi9KthcIbwurpZGS8hy3qA3UCy7oC7k'
+  };
+  var url = Uri.parse('https://fcm.googleapis.com/fcm/send');
+
+  var body = {
+    //هنغير token
+    "to": "/topics/$topic",
     "notification": {"title": title, "body": message},
     "data": {"id": "12", "name": "ashraf", "type": "alert", "m": "dodoo"}
   };
